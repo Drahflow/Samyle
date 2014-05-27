@@ -385,22 +385,9 @@
       { opcode %7E eq } { "jle" =instruction jcc8Op }
       { opcode %7F eq } { "jg" =instruction jcc8Op }
 
-      { opcode %80 eq modrmOpcode 0 eq and } { "add" =instruction gpi8ImmOp }
-      { opcode %80 eq modrmOpcode 1 eq and } { "or" =instruction gpi8ImmOp }
-      { opcode %80 eq modrmOpcode 2 eq and } { "adc" =instruction gpi8ImmOp }
-      { opcode %80 eq modrmOpcode 3 eq and } { "sbb" =instruction gpi8ImmOp }
-      { opcode %80 eq modrmOpcode 4 eq and } { "and" =instruction gpi8ImmOp }
-      { opcode %80 eq modrmOpcode 5 eq and } { "sub" =instruction gpi8ImmOp }
-      { opcode %80 eq modrmOpcode 6 eq and } { "xor" =instruction gpi8ImmOp }
-      { opcode %80 eq modrmOpcode 7 eq and } { "cmp" =instruction gpi8ImmOp }
-      { opcode %83 eq modrmOpcode 0 eq and } { "add" =instruction gpiImm8Op }
-      { opcode %83 eq modrmOpcode 1 eq and } { "or" =instruction gpiImm8Op }
-      { opcode %83 eq modrmOpcode 2 eq and } { "adc" =instruction gpiImm8Op }
-      { opcode %83 eq modrmOpcode 3 eq and } { "sbb" =instruction gpiImm8Op }
-      { opcode %83 eq modrmOpcode 4 eq and } { "and" =instruction gpiImm8Op }
-      { opcode %83 eq modrmOpcode 5 eq and } { "sub" =instruction gpiImm8Op }
-      { opcode %83 eq modrmOpcode 6 eq and } { "xor" =instruction gpiImm8Op }
-      { opcode %83 eq modrmOpcode 7 eq and } { "cmp" =instruction gpiImm8Op }
+      [ /add /or /adc /sbb /and /sub /xor /cmp ] =*:GROUPONE
+      { opcode %80 eq } { modrmOpcode GROUPONE =instruction gpi8ImmOp }
+      { opcode %83 eq } { modrmOpcode GROUPONE =instruction gpiImm8Op }
 
       { opcode %85 eq } { "test" =instruction 0 =dir gpi2Op }
       { opcode %89 eq } { "mov" =instruction 0 =dir gpi2Op }
