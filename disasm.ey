@@ -11,6 +11,7 @@
   { _ ":" via
     { [ [ :target $>hu _ locations .names .has { locations .names * $.red } rep ] <
         { :target $>hu locations .names =[] } =*subst
+        { :target <>gotoByte } =*goto
       > ]
     } /targetParts :redef
   } /addTargetRewrite deffst
@@ -96,6 +97,12 @@
   ] conds } /substituteElement deffd
 
   { [
+    { <>column 2 eq } {
+      <>elem <>byte instrs .partSelect 1 -01 * _ ==actions .?goto { actions .goto } rep
+    }
+  ] conds } /gotoElement deffd
+
+  { [
     { <>column 0 eq } { 1 }
     { <>column 1 eq } { <>byte instrs .length }
     { <>column 2 eq } { <>byte instrs .partCount }
@@ -119,6 +126,11 @@
         } ? *
       }
       { 0 k * :s eq } |substituteElement
+      { 0 k * 29 eq } |gotoElement
+      { 0 k * 0 "/" * eq } {
+        0 22 $goto "/" $out lineInput _ locations .namesReverse .has {
+          locations .namesReverse * txt .consume .hu <>gotoByte } { -- } ? *
+      }
     ] conds
     display
   } /handle deffd
