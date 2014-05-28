@@ -1,5 +1,5 @@
 <
-  terminal "$" via $styling "$:" via
+  terminal "$" via $styling "$:" via $styleStrings "$." via
   utils "$$" via
   locations .cursor "<>" via
   sys .linux "+" via
@@ -7,6 +7,13 @@
 
   0 ==startAddr
   0 ==displayRecursion
+
+  { _ ":" via
+    { [ [ :target $>hu _ locations .names .has { locations .names * $.red } rep ] <
+        { :target $>hu locations .names =[] } =*subst
+      > ]
+    } /targetParts :redef
+  } /addTargetRewrite deffst
 
   <
     map ==cache
@@ -18,7 +25,9 @@
 
     { _ ==addr $>hu ==addrTxt
       addrTxt cache .has { addrTxt cache * } {
-        addr decoder .fromAddress _ addrTxt cache =[]
+        addr decoder .fromAddress
+          addTargetRewrite
+          _ addrTxt cache =[]
       } ? *
     }
   > /instructions defvd /instrs deffd
@@ -79,6 +88,11 @@
 
   { [
     { <>column 0 eq } { 0 22 $goto <>byte $>hu $out " => " $out lineInput <>byte $>hu locations .names =[] }
+    { <>column 2 eq } {
+      <>elem <>byte instrs _ ==instr .partSelect 1 -01 * _ ==actions .?subst {
+        0 22 $goto <>elem instr .txtPartSelect -- $out -- " => " $out lineInput actions .subst
+      } rep
+    }
   ] conds } /substituteElement deffd
 
   { [

@@ -31,21 +31,34 @@
     1 neg ==immWidth
     0 ==hasImmediate
     "???" ==instruction
-    { [ instruction ] } /parts deffst
 
-    { _ sys .typed .type 7 eq { |partsToTxt each } |cat ? * } /partsToTxt deffst
+    { = } /redef deffst
+
+    { [ [ } "[[" deffst { ] < > ] } "]]" deffst
+
+    { [[ instruction ]] } /parts deffst
+
+    { _ sys .typed .type 7 eq { 0 -01 * |partsToTxt each } |cat ? * } /partsToTxt deffst
     { "" parts partsToTxt } /txt deffst
 
-    { _ sys .typed .type 7 eq { |partsToCount each 1 add } { -- } ? * } /partsToCount deffst
+    { _ sys .typed .type 7 eq { 0 -01 * |partsToCount each 1 add } { -- } ? * } /partsToCount deffst
     { 0 parts partsToCount } /partCount deffst
 
     { ==selected 0 ==any 0 ==p
       { 0 ==sel _ sys .typed .type 7 eq {
-        selected p eq _ =sel { "" -01 1 =any } rep p 1 add =p |partsToTxtSelect each sel { "" } rep } |cat ? *
+        selected p eq _ =sel { "" -01 1 =any } rep p 1 add =p 0 -01 * |partsToTxtSelect each sel { "" } rep } |cat ? *
       } /partsToTxtSelect deffst
       "" parts partsToTxtSelect
       any not { "" "" } rep
     } /txtPartSelect deffst
+
+    { ==selected 0 ==any 0 ==p
+      { 0 ==sel _ sys .typed .type 7 eq {
+        selected p eq { _ 1 =any } rep p 1 add =p 0 -01 * |partsToSelect each } { -- } ? *
+      } /partsToSelect deffst
+      parts partsToSelect
+      any not { [[ ]] } rep
+    } /partSelect deffst
 
     1 ==prefixDecoding
     { prefixDecoding 0 =prefixDecoding } {
@@ -118,45 +131,41 @@
     } /gprName deffd
 
     { a startA sub } /length deffst
-    { [ [ instruction ] " " dir { gprRmParts ", " gprRegParts } { gprRegParts ", " gprRmParts } ? * ] } /gpi2opParts deffst
-    { [ "%" reg operandWidth gprName cat ] } /gprRegParts deffst
+    { [[ [[ instruction ]] " " dir { gprRmParts ", " gprRegParts } { gprRegParts ", " gprRmParts } ? * ]] } /gpi2opParts deffst
+    { [[ "%" reg operandWidth gprName cat ]] } /gprRegParts deffst
     { [
-      { mode 3 eq } { [ "%" rm operandWidth gprName cat ] }
-      { mode 3 lt } { [
+      { mode 3 eq } { [[ "%" rm operandWidth gprName cat ]] }
+      { mode 3 lt } { [[
         hasDisp { disp dispParts } rep
         base 0 ge idx 0 ge or { "("
-          base 0 ge { [ "%" base addressWidth gprName ] } rep
+          base 0 ge { [[ "%" base addressWidth gprName ]] } rep
           idx 0 ge {
-            ", " [ "%" idx addressWidth gprName ]
-            scale 1 neq { ", " [ scale $>u ] } rep
+            ", " [[ "%" idx addressWidth gprName ]]
+            scale 1 neq { ", " [[ scale $>u ]] } rep
           } rep
         ")" } rep
-      ] }
+      ]] }
       { 1 } { "??? [rm]" }
     ] conds } /gprRmParts deffst
     { # ==n
       _   [ -01 16 mod "0123456789abcdef" * ] str .fromArray
       -01 16 div
     } /extractHexDigit deffd
-    { ==n [ [
+    { ==n [[ [
       { operandWidth  8 eq } { [ n  2 |extractHexDigit rep -- "$0x" ] reverse |cat fold }
       { operandWidth 16 eq } { [ n  4 |extractHexDigit rep -- "$0x" ] reverse |cat fold }
       { operandWidth 32 eq } { [ n  8 |extractHexDigit rep -- "$0x" ] reverse |cat fold }
       { operandWidth 64 eq } { [ n 16 |extractHexDigit rep -- "$0x" ] reverse |cat fold }
       { 1 } { "??? [immParts]" }
-    ] conds ] } /immParts deffst
-    { ==n [ [
+    ] conds ]] } /immParts deffst
+    { ==n [[ [
       { addressWidth  8 eq } { [ n  2 |extractHexDigit rep -- "$0x" ] reverse |cat fold }
       { addressWidth 16 eq } { [ n  4 |extractHexDigit rep -- "$0x" ] reverse |cat fold }
       { addressWidth 32 eq } { [ n  8 |extractHexDigit rep -- "$0x" ] reverse |cat fold }
       { addressWidth 64 eq } { [ n 16 |extractHexDigit rep -- "$0x" ] reverse |cat fold }
       { 1 } { "??? [dispParts]" }
-    ] conds ] } /dispParts deffst
-    { [
-      target $>hu _ locations .names .has {
-        _ " = " cat -01 locations .names * cat
-      } rep
-    ] } /targetParts deffst
+    ] conds ]] } /dispParts deffst
+    { [[ target $>hu ]] } /targetParts deffst
 
     {
       32 =operandWidth
@@ -177,7 +186,7 @@
       prefix66 { 16 =operandWidth } { } ? *
       rex { 64 =operandWidth } { } ? *
 
-      { [ [ instruction ] " " gprRmParts ] } =parts
+      { [[ [[ instruction ]] " " gprRmParts ]] } =parts
       a decodeRegisterModrm =a
     } /gpi1Op deffst
     {
@@ -188,7 +197,7 @@
       a decodeRegisterModrm =a 1 neg =reg # register field used to select opcodes
       1 =hasImmediate
       a $$memory =imm a 1 add =a
-      { [ [ instruction ] " " imm immParts ", " gprRmParts ] } =parts
+      { [[ [[ instruction ]] " " imm immParts ", " gprRmParts ]] } =parts
       imm 128 ge { imm 256 neg bor =imm } rep
     } /gpiImm8Op deffst
     {
@@ -197,7 +206,7 @@
       a decodeRegisterModrm =a 1 neg =reg # register field used to select opcodes
       1 =hasImmediate
       a $$memory =imm a 1 add =a
-      { [ [ instruction ] " " imm immParts ", " gprRmParts ] } =parts
+      { [[ [[ instruction ]] " " imm immParts ", " gprRmParts ]] } =parts
       imm 128 ge { imm 256 neg bor =imm } rep
     } /gpi8ImmOp deffst
     {
@@ -209,11 +218,11 @@
       1 =hasImmediate
       operandWidth 64 eq 32 operandWidth ? =immWidth
       a a immWidth 8 div add range $$memory 256 math .unbase =imm a immWidth 8 div add =a
-      { [ [ instruction ] " " imm immParts ", " gprRmParts ] } =parts
+      { [[ [[ instruction ]] " " imm immParts ", " gprRmParts ]] } =parts
       operandWidth 64 eq imm 2147483648 ge and { imm 4294967296 neg bor =imm } rep
     } /gpiImmOp deffst
     {
-      { [ [ instruction ] " " gprRegParts ] } =parts
+      { [[ [[ instruction ]] " " gprRegParts ]] } =parts
       64 =operandWidth
     } /popOp deffst
     {
@@ -224,7 +233,7 @@
       1 =hasImmediate
       operandWidth =immWidth
       a a immWidth 8 div add range $$memory 256 math .unbase =imm a immWidth 8 div add =a
-      { [ [ instruction ] " " imm immParts ", " gprRegParts ] } =parts
+      { [[ [[ instruction ]] " " imm immParts ", " gprRegParts ]] } =parts
     } /movIOp deffst
     {
       32 _ =operandWidth =immWidth
@@ -236,7 +245,7 @@
       a a immWidth 8 div add range $$memory 256 math .unbase =imm a immWidth 8 div add =a
       immWidth 32 eq imm 2147483648 ge and { imm 4294967296 neg bor =imm } rep
       immWidth 16 eq imm      32768 ge and { imm      65536 neg bor =imm } rep
-      { [ [ instruction ] " " imm immParts ", " gprRegParts ] } =parts
+      { [[ [[ instruction ]] " " imm immParts ", " gprRegParts ]] } =parts
     } /axImmOp deffst
     {
       8 _ =operandWidth =immWidth
@@ -245,7 +254,7 @@
       1 =hasImmediate
       a a immWidth 8 div add range $$memory 256 math .unbase =imm a immWidth 8 div add =a
       imm 128 ge { imm 256 neg bor =imm } rep
-      { [ [ instruction ] " " imm immParts ", " gprRegParts ] } =parts
+      { [[ [[ instruction ]] " " imm immParts ", " gprRegParts ]] } =parts
     } /ax8ImmOp deffst
     {
       64 =operandWidth
@@ -255,18 +264,18 @@
       a a immWidth 8 div add range $$memory 256 math .unbase =imm a immWidth 8 div add =a
       immWidth 32 eq imm 2147483648 ge and { imm 4294967296 neg bor =imm } rep
       immWidth 16 eq imm      32768 ge and { imm      65536 neg bor =imm } rep
-      { [ [ instruction ] " " targetParts ] } =parts
+      { [[ [[ instruction ]] " " targetParts ]] } =parts
       a imm add =target
     } /callOp deffst
     {
-      { [ instruction ] } =parts
+      { [[ instruction ]] } =parts
     } /trivialOp deffst
     {
       64 =operandWidth
       8 =immWidth
       a $$memory =imm a 1 add =a
       imm 128 ge { imm 256 neg bor =imm } rep
-      { [ [ instruction ] " " targetParts ] } =parts
+      { [[ [[ instruction ]] " " targetParts ]] } =parts
       a imm add =target
     } /jcc8Op deffst
 

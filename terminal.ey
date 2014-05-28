@@ -10,11 +10,13 @@
 
   { deffd }' /defTerminal deffd
   < { deffd }' > /styling defvd /defStyling deffd
+  < { deffd }' > /styleStrings defvd /defStyleString deffd
 
   { ==name ==esc
       { esc out } name defTerminal
       { esc out * normal } name defStyling
     { { esc out * normal } { * } ? * } name "If" cat defStyling
+      { esc -01 cat "\e[0m" cat } name defStyleString
   } /defStyle deffd
 
   "\e[1m" /bold defStyle
